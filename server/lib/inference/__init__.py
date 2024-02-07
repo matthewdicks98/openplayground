@@ -338,8 +338,6 @@ class InferenceManager:
 
         system_content = "You a large language model trained by Nosible. Answer as concisely as possible."
 
-        logger.info(f"Running Nosible")
-
         response = requests.post(
             headers={
                 "Authorization": f"Bearer {provider_details.api_key}",

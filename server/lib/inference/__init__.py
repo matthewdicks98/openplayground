@@ -331,6 +331,80 @@ class InferenceManager:
         else:
             self.__error_handler__(self.__openai_text_generation__, provider_details, inference_request)
 
+    def nosible_text_generation(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
+        self.__error_handler__(self.__nosible_chat_generation__, provider_details, inference_request)
+
+    def __nosible_chat_generation__(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
+
+        system_content = "You a large language model trained by Nosible. Answer as concisely as possible."
+
+        logger.info(f"Running Nosible")
+
+        response = requests.post(
+            headers={
+                "Authorization": f"Bearer {provider_details.api_key}",
+                "Content-Type": "application/json",
+            },
+            url=f"http://{os.environ['FM_SERVER_IP']}/v1/chat/completions",
+            data=json.dumps({
+                "model": f"/models/{inference_request.model_name}",
+                "messages": [
+                    {"role": "system", "content": system_content},
+                    {"role": "user", "content": inference_request.prompt},
+                ],
+                "temperature": float(inference_request.model_parameters['temperature']),
+                "top_p": float(inference_request.model_parameters['topP']),
+                "frequencyPenalty": float(inference_request.model_parameters['frequencyPenalty']),
+                "presencePenalty": float(inference_request.model_parameters['presencePenalty']),
+                "max_tokens": int(inference_request.model_parameters['maximumLength']),
+                "stream": True,
+            }),
+            timeout=60,
+            stream=True
+        )
+
+        if response.status_code != 200:
+            raise Exception(f"Request failed: {response.status_code} {response.reason}")
+
+        tokens = ""
+        cancelled = False
+
+        len_data = len("data: ".encode())
+        for data in response.iter_lines():
+            if len(data) == 0:
+                continue
+            data = data[len_data:]
+            if data == "[DONE]".encode():
+                continue
+            event = json.loads(data.decode())
+            response = event['choices'][0]
+            if response['finish_reason'] == "stop":
+                break
+
+            delta = response['delta']
+
+            if "content" not in delta:
+                continue
+
+            generated_token = delta["content"]
+            tokens += generated_token
+
+            infer_response = InferenceResult(
+                uuid=inference_request.uuid,
+                model_name=inference_request.model_name,
+                model_tag=inference_request.model_tag,
+                model_provider=inference_request.model_provider,
+                token=generated_token,
+                probability=None,
+                top_n_distribution=None
+            )
+
+            if cancelled: continue
+
+            if not self.announcer.announce(infer_response, event="infer"):
+                cancelled = True
+                logger.info(f"Cancelled inference for {inference_request.uuid} - {inference_request.model_name}")
+
     def __cohere_text_generation__(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
         with requests.post("https://api.cohere.ai/generate",
             headers={

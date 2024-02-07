@@ -1,4 +1,53 @@
 {
+
+  "nosible": {
+    "requiresAPIKey": true,
+    "remoteInference": true,
+    "models" : {
+        "OpenHermes-2.5-Mistral-7B": {
+          "enabled": false,
+          "status": "ready",
+            "parameters": {
+          "temperature": {
+            "value": 0.5,
+            "range": [
+              0.1,
+              1
+            ]
+          },
+          "maximumLength": {
+            "value": 200,
+            "range": [
+              50,
+              8192
+            ]
+          },
+          "topP": {
+            "value": 1,
+            "range": [
+              0.1,
+              1
+            ]
+          },
+          "presencePenalty": {
+            "value": 0,
+            "range": [
+              0,
+              1
+            ]
+          },
+          "frequencyPenalty": {
+            "value": 0,
+            "range": [
+              0,
+              1
+            ]
+          }
+        }
+      }
+    }
+},
+
   "openai": {
     "requiresAPIKey": true,
     "remoteInference": true,

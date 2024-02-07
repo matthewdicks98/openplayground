@@ -11,9 +11,14 @@ export const styleMap = {
   };
   
   export const styles = {
-    openai: {
+    nosible: {
       transition: "background-color 0.2s ease-in-out",
       backgroundColor: "#b9eebc",
+      padding: "2px 0",
+    },
+    openai: {
+      transition: "background-color 0.2s ease-in-out",
+      backgroundColor: "#81D4FA",
       padding: "2px 0",
     },
     huggingface_local: {

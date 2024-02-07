@@ -58,6 +58,8 @@ export const styleMap = {
   export function getDecoratedStyle(provider: string, showHighlights: boolean) {
     if (showHighlights === false) return styles.default;
     switch (provider) {
+      case "nosible":
+        return styles.nosible
       case "openai":
         return styles.openai;
       case "huggingface-local":

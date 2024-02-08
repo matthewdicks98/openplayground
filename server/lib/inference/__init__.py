@@ -343,7 +343,7 @@ class InferenceManager:
                 "Authorization": f"Bearer {provider_details.api_key}",
                 "Content-Type": "application/json",
             },
-            url=f"http://{os.environ['FM_SERVER_IP']}/v1/chat/completions",
+            url=f"http:///v1/chat/completions",  # {os.environ['FM_SERVER_IP']}
             data=json.dumps({
                 "model": f"/models/{inference_request.model_name}",
                 "messages": [
